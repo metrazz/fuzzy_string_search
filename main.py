@@ -11,7 +11,6 @@ class FuzzySearch:
 
     @staticmethod
     def levenshtein_distance(s1: str, s2: str) -> int:
-        """Расстояние Левенштейна между двумя строками"""
         if len(s1) < len(s2):
             return FuzzySearch.levenshtein_distance(s2, s1)
 
@@ -32,7 +31,6 @@ class FuzzySearch:
 
     @staticmethod
     def damerau_levenshtein_distance(s1: str, s2: str) -> int:
-        """Расстояние Дамерау-Левенштейна между двумя строками"""
         d = {}
         len1 = len(s1)
         len2 = len(s2)
@@ -59,7 +57,6 @@ class FuzzySearch:
         return d[(len1 - 1, len2 - 1)]
 
     def load_corpus_from_file(self, file_path: str, name: str) -> str:
-        """Загружает корпус из локального файла"""
         try:
             with open(file_path, 'r', encoding='cp1251') as f:
                 content = f.read()
@@ -74,7 +71,6 @@ class FuzzySearch:
                 "words": words
             }
 
-            # Автоматически выбираем первый загруженный корпус
             if self.current_corpus is None:
                 self.current_corpus = corpus_id
 
@@ -83,7 +79,6 @@ class FuzzySearch:
             raise Exception(f"Error loading corpus from file: {str(e)}")
 
     def load_corpus_from_url(self, url: str, name: str) -> str:
-        """Загружает корпус по URL"""
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -99,7 +94,6 @@ class FuzzySearch:
                 "words": words
             }
 
-            # Автоматически выбираем первый загруженный корпус
             if self.current_corpus is None:
                 self.current_corpus = corpus_id
 
@@ -108,7 +102,6 @@ class FuzzySearch:
             raise Exception(f"Error loading corpus from URL: {str(e)}")
 
     def list_corpuses(self) -> list:
-        """Возвращает список всех корпусов"""
         return [
             {
                 "id": corpus_id,
@@ -120,7 +113,6 @@ class FuzzySearch:
         ]
 
     def set_current_corpus(self, corpus_id: str):
-        """Устанавливает текущий корпус для поиска"""
         if corpus_id in self.corpuses:
             self.current_corpus = corpus_id
         else:
@@ -193,12 +185,10 @@ class FuzzySearch:
         return results
 
     def interactive_search_loop(self):
-        """Бесконечный цикл интерактивного поиска"""
         print("=== Система нечеткого поиска ===")
         print("Загрузите корпус для начала работы")
 
         while True:
-            # Загрузка корпуса, если еще нет
             if not self.corpuses:
                 print("\nНет загруженных корпусов. Пожалуйста, загрузите корпус.")
                 self.load_corpus_interactive()
@@ -228,7 +218,6 @@ class FuzzySearch:
                 print("Неверный выбор. Попробуйте снова.")
 
     def load_corpus_interactive(self):
-        """Интерактивная загрузка корпуса"""
         print("\nЗагрузка нового корпуса:")
         source = input("Загрузить из (1) файла или (2) URL? ").strip()
         name = input("Название корпуса: ").strip()
@@ -250,7 +239,6 @@ class FuzzySearch:
             print(f"\nОшибка: {str(e)}")
 
     def select_corpus_interactive(self):
-        """Интерактивный выбор корпуса"""
         print("\nДоступные корпусы:")
         corpuses = self.list_corpuses()
         for i, corpus in enumerate(corpuses, 1):
@@ -269,14 +257,12 @@ class FuzzySearch:
             print("Введите число.")
 
     def show_corpuses(self):
-        """Показать список корпусов"""
         print("\nДоступные корпусы:")
         for corpus in self.list_corpuses():
             current_mark = " (текущий)" if corpus["is_current"] else ""
             print(f"- {corpus['name']} (ID: {corpus['id']}, слов: {corpus['word_count']}{current_mark}")
 
     def run_search(self):
-        """Выполняет поиск и выводит результаты"""
         word = input("\nВведите слово для поиска: ").strip()
         if not word:
             print("Слово не может быть пустым.")
@@ -312,7 +298,6 @@ class FuzzySearch:
             for i, item in enumerate(results["damerau_levenshtein"]["results"], 1):
                 print(f"{i}. {item['word']} (расстояние: {item['distance']})")
 
-            # Сравнение результатов
             lev_words = {item["word"] for item in results["levenshtein"]["results"]}
             dam_lev_words = {item["word"] for item in results["damerau_levenshtein"]["results"]}
 
@@ -329,17 +314,6 @@ class FuzzySearch:
             print(f"\nОшибка при выполнении поиска: {str(e)}")
 
 
-# Запуск программы
 if __name__ == "__main__":
     searcher = FuzzySearch()
-
-    # Можно предварительно загрузить корпус для демонстрации
-    # try:
-    #     searcher.load_corpus_from_url(
-    #         "https://raw.githubusercontent.com/dwyl/english-words/master/words.txt",
-    #         "English Words"
-    #     )
-    # except Exception as e:
-    #     print(f"Не удалось загрузить демонстрационный корпус: {str(e)}")
-
     searcher.interactive_search_loop()
